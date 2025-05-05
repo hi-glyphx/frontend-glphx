@@ -1,0 +1,34 @@
+.selectUrl {
+  background-color: #f9f6ff !important;
+  width: 300px;
+  /* border-radius: 16px; */
+}
+
+.editButton {
+  border-bottom: 1px solid #aa7cee;
+  width: max-content;
+}
+
+.groupsEditLink {
+  font-size: 0.875rem;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.25rem;
+  text-decoration: underline !important;
+
+  /* text-decoration-line: underline;
+  background: -webkit-linear-gradient(45deg, #7260ed 0%, #aa7cee 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; */
+}
+
+.permissionTags {
+  box-shadow: none;
+  border-radius: 0.25rem;
+  border: 1px solid var(--primary-border, #e7e6f0);
+}
+
+.actionColumn {
+  text-decoration: none;
+  color: #524587;
+}

@@ -1,0 +1,12 @@
+.extractionReportPdf {
+  height: 750px;
+}
+
+.extractionReportPdf .pdf-reader {
+  overflow: auto;
+}
+
+.extractionReportPdf .consultation_card_box {
+  height: 100%;
+  overflow: auto;
+}

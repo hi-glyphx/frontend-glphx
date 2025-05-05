@@ -1,0 +1,16 @@
+<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="calendar 1 (traced)">
+<rect id="Rectangle 2587" x="4" y="32" width="12" height="28" rx="3" transform="rotate(-90 4 32)" stroke="url(#paint0_linear_972_10800)" stroke-width="2"/>
+<rect id="Rectangle 2588" x="4" y="16" width="12" height="28" rx="3" transform="rotate(-90 4 16)" stroke="url(#paint1_linear_972_10800)" stroke-width="2"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_972_10800" x1="3" y1="63" x2="18.4937" y2="62.2077" gradientUnits="userSpaceOnUse">
+<stop stop-color="#7260ED"/>
+<stop offset="1" stop-color="#AA7CEE"/>
+</linearGradient>
+<linearGradient id="paint1_linear_972_10800" x1="3" y1="47" x2="18.4937" y2="46.2077" gradientUnits="userSpaceOnUse">
+<stop stop-color="#7260ED"/>
+<stop offset="1" stop-color="#AA7CEE"/>
+</linearGradient>
+</defs>
+</svg>
