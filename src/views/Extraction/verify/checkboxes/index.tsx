@@ -17,12 +17,17 @@ import CommonHeader from "@/components/Common/Header";
 import { useDispatch, useSelector } from "react-redux";
 import { GetCheckboxes, SaveCheckboxes } from "@/Store/Reducer/ExtractionSlice";
 import { AppDispatch } from "@/Store/Store";
+import Toaster from "@/components/Common/Toaster";
 
 interface TYPES{
-  setintigateApi?:any
+  setintigateApi?:any;
+  isDemo?: boolean;
 }
 
-const Index = ({setintigateApi}:TYPES) => {
+// Mock image data for demo mode - base64 placeholder image
+const mockImageBase64 = "iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAACXBIWXMAAAsTAAALEwEAmpwYAAABNklEQVR42u3UMQEAAAjDMMC/50NAdwkSsCRqmAEQEBAQEBAQEBAQEBCQUwABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBASm3A9tkLHuwYAZgAAAAAElFTkSuQmCC";
+
+const Index = ({setintigateApi, isDemo = false}:TYPES) => {
   const dispatch = useDispatch<AppDispatch>();
   const { checkboxesDetail } = useSelector(
     ({ ExtractionSlice }) => ExtractionSlice
@@ -58,8 +63,8 @@ const Index = ({setintigateApi}:TYPES) => {
   }
 
   // Example usage:
-  const [uncheckedBox, setUncheckedBox] = useState([]);
-  const [checkedBox, setcheckedBox] = useState([]);
+  const [uncheckedBox, setUncheckedBox] = useState<any[]>([]);
+  const [checkedBox, setcheckedBox] = useState<any[]>([]);
   const [uncheckedBoxvalue, setUncheckedBoxValue] = useState<any>();
   const [checkedBoxvalue, setCheckedBoxValue] = useState<any>();
 
@@ -70,7 +75,7 @@ const Index = ({setintigateApi}:TYPES) => {
     checkboxesDetail?.data &&
       checkboxesDetail?.data["☐"]?.forEach((item) => {
         cropImageFromUrl(
-          `data:image/png;base64,${checkboxesDetail?.meta?.image}`,
+          `data:image/png;base64,${isDemo ? mockImageBase64 : checkboxesDetail?.meta?.image}`,
           item?.crop_position,
           function (croppedImageUrl) {
             const idExistsInUpdate =
@@ -92,7 +97,7 @@ const Index = ({setintigateApi}:TYPES) => {
     checkboxesDetail?.data &&
       checkboxesDetail?.data["☑"]?.forEach((item) => {
         cropImageFromUrl(
-          `data:image/png;base64,${checkboxesDetail?.meta?.image}`,
+          `data:image/png;base64,${isDemo ? mockImageBase64 : checkboxesDetail?.meta?.image}`,
           item?.crop_position,
           function (croppedImageUrl) {
             const idExistsInUpdate =
@@ -112,7 +117,7 @@ const Index = ({setintigateApi}:TYPES) => {
           }
         );
       });
-  }, [checkboxesDetail]);
+  }, [checkboxesDetail, isDemo]);
 
   const moveDataToChecked = (id) => {
     const itemToMove = uncheckedBox.find((item: any) => item.id === id);
@@ -136,12 +141,15 @@ const Index = ({setintigateApi}:TYPES) => {
 
   const handleSave = () => {
     let newUncheck = uncheckedBox?.map((data: any) => {
-      delete data.croppedImageUrl;
-      return data;
+      // Create a new object without the croppedImageUrl property
+      const { croppedImageUrl, ...rest } = data;
+      return rest;
     });
+    
     let newCheck = checkedBox?.map((data: any) => {
-      delete data.croppedImageUrl;
-      return data;
+      // Create a new object without the croppedImageUrl property
+      const { croppedImageUrl, ...rest } = data;
+      return rest;
     });
 
     let request = {
@@ -154,18 +162,24 @@ const Index = ({setintigateApi}:TYPES) => {
         "☑": newCheck,
       },
     };
-    dispatch(SaveCheckboxes(request)).then((res)=>{
-      if(res?.payload){
-        dispatch(GetCheckboxes()).then((res) => {
-          if (!res?.payload?.data || Object.keys(res.payload.data).length === 0) {
-            setintigateApi(true);
-          } else {
-            setintigateApi(false);
-          }
-        });
-      }
-     
-    })
+    
+    if (isDemo) {
+      // If in demo mode, just show a toaster notification and don't call API
+      Toaster({ customMessage: "Demo: Checkbox data saved successfully!" });
+    } else {
+      // In normal mode, proceed with API call
+      dispatch(SaveCheckboxes(request)).then((res)=>{
+        if(res?.payload){
+          dispatch(GetCheckboxes()).then((res) => {
+            if (!res?.payload?.data || Object.keys(res.payload.data).length === 0) {
+              setintigateApi && setintigateApi(true);
+            } else {
+              setintigateApi && setintigateApi(false);
+            }
+          });
+        }
+      });
+    }
   };
 
   return (
@@ -307,7 +321,6 @@ const Index = ({setintigateApi}:TYPES) => {
           </div>
         </Card>
       </div>
-
     </>
   );
 };

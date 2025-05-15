@@ -8,9 +8,9 @@ import { useDispatch } from "react-redux";
 export default function Groups() {
   const dispatch = useDispatch<AppDispatch>();
 
-  useEffect(() => {
-    dispatch(Groupslist(`?format=json`))
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(Groupslist(`?format=json`))
+  // }, [dispatch]);
 
   return (
     <div className="flex flex-col gap-y-4 groups-page">

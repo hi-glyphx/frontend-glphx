@@ -10,7 +10,37 @@ import { useDispatch, useSelector } from "react-redux";
 import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 
-const CheckBoxIndex = () => {
+// Mock data for demo mode
+const mockCheckboxesData = {
+  data: {
+    document_id: "DEMO-12345",
+    document_type: "Form",
+    document_name: "Sample Form.pdf",
+    document_status: "pending",
+    checkbox_groups: [
+      {
+        group_id: "group1",
+        group_name: "Options Group A",
+        checkboxes: [
+          { id: "cb1", label: "Option 1", isChecked: true, confidence: 0.92 },
+          { id: "cb2", label: "Option 2", isChecked: false, confidence: 0.88 },
+          { id: "cb3", label: "Option 3", isChecked: false, confidence: 0.75 }
+        ]
+      },
+      {
+        group_id: "group2",
+        group_name: "Options Group B",
+        checkboxes: [
+          { id: "cb4", label: "Yes", isChecked: true, confidence: 0.95 },
+          { id: "cb5", label: "No", isChecked: false, confidence: 0.89 }
+        ]
+      }
+    ],
+    image_url: "https://via.placeholder.com/800x1000"
+  }
+};
+
+const CheckBoxIndex = ({ isDemo = false }) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const { checkboxesDetail } = useSelector(
@@ -19,51 +49,73 @@ const CheckBoxIndex = () => {
 
   const [seconds, setSeconds] = useState<any>();
   const [isZoom, setIsZoom] = useState(false);
-
   const [intigateApi, setintigateApi] = useState(false);
+  
   useEffect(() => {
-    if (intigateApi) {
+    if (intigateApi && !isDemo) {
       const intervalId = setInterval(() => {
         if (seconds > 0) {
           setSeconds(seconds - 1);
         } else {
-          dispatch(GetCheckboxes()).then((res) => {
-            if (
-              !res?.payload?.data ||
-              Object.keys(res.payload.data).length === 0
-            ) {
-              setSeconds(20);
-              setintigateApi(true);
-            } else {
-              setintigateApi(false);
-            }
-          });
+          if (isDemo) {
+            // In demo mode, just set mock data
+            dispatch({
+              type: "extraction/getCheckboxes/fulfilled",
+              payload: mockCheckboxesData
+            });
+            setintigateApi(false);
+          } else {
+            dispatch(GetCheckboxes()).then((res) => {
+              if (
+                !res?.payload?.data ||
+                Object.keys(res.payload.data).length === 0
+              ) {
+                setSeconds(20);
+                setintigateApi(true);
+              } else {
+                setintigateApi(false);
+              }
+            });
+          }
         }
       }, 1000);
 
       return () => clearInterval(intervalId);
     }
-    return () => dispatch(ClearCheckboxesData());
-  }, [dispatch, seconds, intigateApi]);
+    
+    // Cleanup function
+    return () => {
+      if (!isDemo) {
+        dispatch(ClearCheckboxesData());
+      }
+    };
+  }, [dispatch, seconds, intigateApi, isDemo]);
 
   useEffect(() => {
     if (!intigateApi) {
-      dispatch(GetCheckboxes()).then((res) => {
-        if (!res?.payload?.data || Object.keys(res.payload.data).length === 0) {
-          setintigateApi(true);
-        } else {
-          setintigateApi(false);
-        }
-      });
+      if (isDemo) {
+        // In demo mode, dispatch mock data instead of API call
+        dispatch({
+          type: "extraction/getCheckboxes/fulfilled",
+          payload: mockCheckboxesData
+        });
+      } else {
+        dispatch(GetCheckboxes()).then((res) => {
+          if (!res?.payload?.data || Object.keys(res.payload.data).length === 0) {
+            setintigateApi(true);
+          } else {
+            setintigateApi(false);
+          }
+        });
+      }
     }
-  }, [dispatch]);
+  }, [dispatch, intigateApi, isDemo]);
 
   var browserZoomLevel: any =
     typeof window !== "undefined" && Math.round(window.devicePixelRatio * 100);
 
   useEffect(() => {
     if (browserZoomLevel > 100) {
-      // alert("Desired view will be at 100%");
       setIsZoom(true);
     } else {
       setIsZoom(false);
@@ -111,21 +163,8 @@ const CheckBoxIndex = () => {
           </div>
         </div>
       )}
-      {!checkboxesDetail?.data ||
-      Object.keys(checkboxesDetail?.data)?.length === 0 ? (
-        <div className="flex flex-col justify-center items-center h-screen">
-          <div className="flex flex-col gap-y-4">
-            <Typography variant="h4" color="text.secondary" textAlign="center">
-              Reloading Page in {!seconds ? "20" : seconds} Seconds . . .
-            </Typography>
-            <Typography variant="h1" color="text.secondary" textAlign="center">
-              No more checkboxes to verify. Try after some time.
-            </Typography>
-          </div>
-        </div>
-      ) : (
-        <Index setintigateApi={setintigateApi} />
-      )}
+      
+      <Index setintigateApi={setintigateApi} isDemo={isDemo} />
     </>
   );
 };

@@ -14,7 +14,6 @@ import IconService from "@/utils/Icons";
 import DropDownSearch from "@/components/tables/DropDownSearch";
 import CommonDateRangePicker from "@/components/Common/DateRange/DateRangePicker";
 
-import AddFileLink from "@/components/Common/AddFileLink";
 import { SimpleCtx } from "@/components/Common/Context";
 import { useDispatch } from "react-redux";
 import {
@@ -42,13 +41,14 @@ interface TYPE {
   checkedData?: any;
   data: Classificationbatch[];
   tableHeader?: TableColumn[];
+  isDemoMode?: boolean;
 }
 
 export default function TableHeader({
   checkedData,
   data,
-
   tableHeader,
+  isDemoMode = false
 }: TYPE) {
   const [isTrue, setIsTrue] = React.useState<boolean>(false);
   const { selectedData, setSelectedData }: any = useContext(SimpleCtx);
@@ -62,13 +62,19 @@ export default function TableHeader({
         return item?.original?.batch_id;
       });
 
-    dispatch(DeleteClassificationBatch({ batch_id: updateDeleteData })).then(
-      (res) => {
-        if (res) {
-          dispatch(Classification(`?page=1`));
+    if (isDemoMode) {
+      // In demo mode, just show a message or simulate deletion
+      console.log("Demo: Deleting batches:", updateDeleteData);
+      // Could show a toast notification here
+    } else {
+      dispatch(DeleteClassificationBatch({ batch_id: updateDeleteData })).then(
+        (res) => {
+          if (res) {
+            dispatch(Classification(`?page=1`));
+          }
         }
-      }
-    );
+      );
+    }
   };
 
   const onExpireBatch = () => {
@@ -79,15 +85,22 @@ export default function TableHeader({
         if (item?.original?.batch_id) {
           return item?.original?.batch_id;
         }
-      });
+        return null;
+      }).filter(id => id !== null);
 
-    dispatch(updateClassificationBatch({ batch_id: updateBatchId })).then(
-      (res) => {
-        if (res) {
-          dispatch(Classification(`?page=1`));
+    if (isDemoMode) {
+      // In demo mode, just show a message or simulate expiration
+      console.log("Demo: Expiring batches:", updateBatchId);
+      // Could show a toast notification here
+    } else {
+      dispatch(updateClassificationBatch({ batch_id: updateBatchId })).then(
+        (res) => {
+          if (res) {
+            dispatch(Classification(`?page=1`));
+          }
         }
-      }
-    );
+      );
+    }
   };
 
   const theme = useTheme();
@@ -116,6 +129,7 @@ export default function TableHeader({
     if (updateData.from_date && updateData.to_date) {
       return `?from_date=${updateData.from_date}&to_date=${updateData.to_date}`;
     }
+    return "";
   };
 
   const handleDateFilter = (e: DateFiler[]) => {
@@ -136,8 +150,8 @@ export default function TableHeader({
           background: theme.palette.primary.light,
         }}
       >
-        <div className="flex justify-between flex-row  items-center h-8">
-          <div className="flex flex-row  items-center gap-4">
+        <div className="flex justify-between flex-row items-center h-8">
+          <div className="flex flex-row items-center gap-4">
             <FormControlLabel
               className="h-12"
               control={
@@ -145,16 +159,16 @@ export default function TableHeader({
                   className="cursor-pointer"
                   color="primary"
                   checked={
-                    selectedData?.tableSelectedData?.length == data?.length
+                    selectedData?.tableSelectedData?.length === data?.length
                   }
                   icon={
                     <img src={IconService.Uncheck.src} alt="Uncheck icon"></img>
                   }
-                  checkedIcon={<img src={IconService.checkedIcon.src} />}
+                  checkedIcon={<img src={IconService.checkedIcon.src} alt="Check icon" />}
                   indeterminateIcon={
                     <img
                       src={IconService.intermidiateminus.src}
-                      alt="Uncheck icon"
+                      alt="Intermediate icon"
                     ></img>
                   }
                   onChange={(e) => {
@@ -173,14 +187,14 @@ export default function TableHeader({
             />
 
             {selectedData?.tableSelectedData?.length > 0 && (
-              <div className="common-header-selected-section  h-12 flex flex-row  items-center gap-4 flex-wrap">
-                <span className="flex flex-row  items-center gap-1">
+              <div className="common-header-selected-section h-12 flex flex-row items-center gap-4 flex-wrap">
+                <span className="flex flex-row items-center gap-1">
                   <Typography variant="body2" color="text.secondary">
                     Selected {selectedData?.tableSelectedData?.length} Document
                   </Typography>
                 </span>
                 <span
-                  className="flex flex-row  items-center gap-1 chip-label cursor-pointer"
+                  className="flex flex-row items-center gap-1 chip-label cursor-pointer"
                   onClick={onExpireBatch}
                 >
                   <Image
@@ -194,7 +208,7 @@ export default function TableHeader({
                   </Typography>
                 </span>
                 <span
-                  className="flex flex-row  items-center gap-1 chip-label cursor-pointer"
+                  className="flex flex-row items-center gap-1 chip-label cursor-pointer"
                   onClick={onDeleteCase}
                 >
                   <Image

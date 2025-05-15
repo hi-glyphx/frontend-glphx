@@ -188,23 +188,52 @@ export const ClassificationBatch = createAsyncThunk(
     }
   }
 );
+// Replace the GetClassificationBatches function with this mock implementation
+
 export const GetClassificationBatches = createAsyncThunk(
   "GetClassificationBatches",
-  async (value, { dispatch }) => {
+  async (_, { dispatch }) => {
     try {
-      dispatch(setLoading(true));
-      const result = await GetClassificationBatchesAPI();
-      if (result) {
-        dispatch(setLoading(false));
-        return result;
-      } else {
-        throw result;
-      }
+      // Mock data instead of API call
+      const mockBatchesData = {
+        data: [
+          {
+            id: "batch-001",
+            name: "Classification Batch Alpha",
+            status: "Ready", 
+            created_at: new Date().toISOString(),
+            items: 12
+          },
+          {
+            id: "batch-002",
+            name: "Classification Batch Beta",
+            status: "Processing",
+            created_at: new Date().toISOString(),
+            items: 8
+          },
+          {
+            id: "batch-003",
+            name: "Classification Batch Gamma",
+            status: "Completed",
+            created_at: new Date().toISOString(),
+            items: 15
+          }
+        ],
+        success: true
+      };
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log("Returning mock classification batches data:", mockBatchesData);
+      return mockBatchesData;
     } catch (error: unknown) {
-      dispatch(setLoading(false));
-      const errorMessage = (error as Error)?.message || "An error occurred.";
-      dispatch(setMessage({ text: errorMessage, type: AlertEnum.Error }));
-      return error;
+      console.error("Error in mock GetClassificationBatches:", error);
+      dispatch(setMessage({ 
+        text: (error as Error)?.message || "Failed to fetch classification batches", 
+        type: AlertEnum.Error 
+      }));
+      throw error;
     }
   }
 );

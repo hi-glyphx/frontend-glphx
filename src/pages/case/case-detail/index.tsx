@@ -263,15 +263,15 @@ const CaseDetailPage = () => {
 
   const dispatch = useDispatch<AppDispatch>();
 
-  useEffect(() => {
-    if (id) {
-      dispatch(CaseDetailById(id));
-    }
+  // useEffect(() => {
+  //   if (id) {
+  //     dispatch(CaseDetailById(id));
+  //   }
 
-    return () => {
-      dispatch(setClearCaseDetail(""));
-    };
-  }, [id, dispatch]);
+  //   return () => {
+  //     dispatch(setClearCaseDetail(""));
+  //   };
+  // }, [id, dispatch]);
 
   const searchFilterFunction = (searchTerm, columns?: any) => {
     let searchValue = searchTerm.split("=")[1]; // Extract the search value

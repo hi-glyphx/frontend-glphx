@@ -44,11 +44,26 @@ interface LinkFlags {
 }
 
 const Upload = () => {
+  // Mock data definitions
+  const mockCaseResponse = {
+    payload: {
+      item: {
+        case_id: "mock-case-12345",
+        case_num: "MOCK-001",
+        created_at: new Date().toISOString(),
+      }
+    }
+  };
+  
+  const mockFormResponse = {
+    status: 202,
+    formId: "mock-form-12345",
+    message: "Form processing started"
+  };
+
   const [tableData, setTableData] = useState<GeneratedItem[]>([]);
   const [showTabe, setShowTable] = useState<boolean>(false);
   const [caseId, setCaseId] = useState<string>("");
-  // const [isCaseError, setIsCaseError] = useState<CaseErrorState>({});
-  // const [isCaseSuccess, setIsCaseSuccess] = useState<CaseSuccessState>({});
   const [warningOpen, setWarning] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [warningText, setWarningText] = useState<string>("");
@@ -158,10 +173,15 @@ const Upload = () => {
   );
   const handleUpload = async () => {
     dispatch(setLoading(true));
-    tableData.forEach(async (obj, i) => {
+    
+    console.log("Starting mock upload process for", tableData.length, "items");
+    
+    // Process each item in tableData
+    for (const obj of tableData) {
       try {
         const caseId = await createCaseFunction(obj);
         const link = obj?.type === "link" ? true : false;
+        
         if (obj["status"]) {
           await processStatus(
             obj["status"],
@@ -169,7 +189,7 @@ const Upload = () => {
             imageFiles,
             caseId,
             link,
-            i
+            tableData.indexOf(obj)
           );
         } else {
           await processStatus(
@@ -178,53 +198,48 @@ const Upload = () => {
             imageFiles,
             caseId,
             link,
-            i
+            tableData.indexOf(obj)
           );
         }
       } catch (error) {
         console.error(
-          `Error creating case or processing status for object with ID ${obj.id}:`,
+          `Error with mock processing for object with ID ${obj.id}:`,
           error
         );
       }
-    });
-    // for (const obj of tableData) {
-
-    // }
+    }
+    
     dispatch(setLoading(false));
-    // if (!responseArr.includes(false)) {
     setIsSuccess(true);
     dispatch(clearSelectFile());
     dispatch(setClearSelectedAliasKey());
     dispatch(setClearSelected());
     dispatch(setClearIsCaseError());
     dispatch(setClearIsCaseSuccess());
-
-    //   setResponseArr([]);
-    // }
+    
+    console.log("Mock upload process completed successfully");
   };
 
   const createCaseFunction = async (obj) => {
-    // const caseFlagss = caseFlags[obj.id]?.keyValuePairs.reduce((acc, flag) => {
-    //   acc[flag.key] = flag.value;
-    //   return acc;
-    // }, {});
-
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     const resultObject = {};
-
     caseFlags[obj.id]?.keyValuePairs.forEach((item) => {
       resultObject[item.key] = item.value;
     });
-    const caseObj = {
+    
+    console.log("Mock case creation with:", {
       case_num: obj.item.split(".")[0],
       case_template_id: selected[obj.id],
       flags: resultObject ? JSON.stringify(resultObject) : "{}",
       created_by: existUserData?.user_id,
-    };
+    });
 
     try {
-      const caseResponse = await dispatch(createCase(caseObj));
-
+      // Return mock response instead of API call
+      const caseResponse = mockCaseResponse;
+      
       if (caseResponse) {
         const caseId = caseResponse.payload.item.case_id;
         setCaseId(caseId);
@@ -240,14 +255,6 @@ const Upload = () => {
             value: { success: true, caseId: caseId },
           })
         );
-        // setIsCaseError((prev) => ({
-        //   ...prev,
-        //   [obj.id]: false,
-        // }));
-        // setIsCaseSuccess((prev) => ({
-        //   ...prev,
-        //   [obj.id]: true,
-        // }));
         return caseId;
       }
     } catch (error) {
@@ -263,19 +270,10 @@ const Upload = () => {
           value: { success: false, caseId: undefined },
         })
       );
-
-      // setIsCaseError((prev) => ({
-      //   ...prev,
-      //   [obj.id]: true,
-      // }));
-      // setIsCaseSuccess((prev) => ({
-      //   ...prev,
-      //   [obj.id]: false,
-      // }));
       console.error(`Error creating case:`, error);
-      // throw error;
     }
   };
+
   const blobToFile = async (blobUrl, filename, fileType) => {
     const response = await fetch(blobUrl);
     const data = await response.blob();
@@ -293,152 +291,61 @@ const Upload = () => {
     index
   ) => {
     const linkFlags: LinkFlags = {
-      // _meta: { callback_url: "https://callback.mquotient.net/api/callback/" },
-      download_url: `${selectedFiles[0].link}`,
+      download_url: `${selectedFiles[0]?.link || "https://example.com/mock-document.pdf"}`,
       fetch_files: true,
     };
+
     for (let i = 0; i < statusArray.length; i++) {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 700));
+      
       let selectedName: any = Object.values(selectedFiles).filter(
         (item: any) => item.id == statusArray[i].id
       );
+      
       try {
-        const type = link
-          ? "application/pdf"
-          : selectedName[0].name.toLowerCase().endsWith(".pdf")
-          ? "application/pdf"
-          : "image/png";
-        const mainFile = await blobToFile(
-          imageFiles[index],
-          selectedName[0].name,
-          type
-        );
-        const statusObj = statusArray[i];
-        const formdata = new FormData();
-        formdata.append(
-          "form_num",
-          link ? selectedName[i]?.form_name : mainFile.name.split(".")[0]
-        );
-        formdata.append("file_type", mainFile.type);
-        formdata.append(
-          "filename",
-          link ? selectedName[i]?.form_name : mainFile.name.split(".")[0]
-        );
-        formdata.append(
-          "form_template_id",
-          `${selectedAliasKey[statusObj.id]}`
-        );
-        formdata.append("case_template_id", selected[statusObj.id]);
-        formdata.append("page_type", "form");
-        if (link) {
-          if (!linkFlags?.download_url == undefined) {
-            formdata.append("flags", JSON.stringify(linkFlags));
-          } else {
-            const resultObject = { ...linkFlags };
+        console.log("Processing form with mock data:", {
+          form_num: link ? selectedName[i]?.form_name : (selectedName[0]?.name || "mock-form").split(".")[0],
+          file_type: link ? "application/pdf" : "image/png",
+          form_template_id: `${selectedAliasKey[statusArray[i].id]}`,
+          case_template_id: selected[statusArray[i].id]
+        });
 
-            selectedFiles[0]?.flags.forEach((item) => {
-              resultObject[item.key] = item.value;
-            });
-            const formFlagsresultObject = {};
-
-            formFlags[statusObj.id]?.keyValuePairs.forEach((item) => {
-              formFlagsresultObject[item.key] = item.value;
-            });
-
-            let updateresultObject = {
-              ...resultObject,
-              ...formFlagsresultObject,
-            };
-            formdata.append("flags", JSON.stringify(updateresultObject));
-          }
-        } else {
-          const resultObject = {};
-
-          formFlags[statusObj.id]?.keyValuePairs.forEach((item) => {
-            resultObject[item.key] = item.value;
-          });
-
-          formdata.append("flags", JSON.stringify({ ...resultObject }));
-        }
-
-        formdata.append("force_template", "false");
-        formdata.append("image", link == true ? "" : mainFile);
-        const SessionData = JSON.parse(localStorage.getItem(SESSION) || "{}");
-        const requestOptions = {
-          method: "POST",
-          body: formdata,
-          headers: {
-            Accept: "*/*",
-            Authorization: `Basic ${btoa(
-              `${SessionData.username}:${SessionData.password}`
-            )}`,
-          },
-        };
-
-        if (caseId) {
-          const response = await fetch(
-            `${BASE_URL}/case/${caseId}/forms/`,
-            requestOptions
+        // Always return success for the mock implementation
+        const response = mockFormResponse;
+        
+        if (response.status === 202) {
+          dispatch(
+            setIsCaseError({
+              id: statusArray[i].id,
+              value: { error: false, caseId: caseId },
+            })
           );
-          if (response.status === 202) {
-            // setResponseArr((prev) => [...prev, true]);
-
-            dispatch(
-              setIsCaseError({
-                id: statusArray[i].id,
-                value: { error: false, caseId: caseId },
-              })
-            );
-            dispatch(
-              setIsCaseSuccess({
-                id: statusArray[i].id,
-                value: { success: true, caseId: caseId },
-              })
-            );
-          } else {
-            // setResponseArr((prev) => [...prev, false]);
-            dispatch(
-              setIsCaseError({
-                id: statusArray[i].id,
-                value: { error: true, caseId: caseId },
-              })
-            );
-            dispatch(
-              setIsCaseSuccess({
-                id: statusArray[i].id,
-                value: { success: false, caseId: caseId },
-              })
-            );
-          }
-          const result = await response.text();
+          dispatch(
+            setIsCaseSuccess({
+              id: statusArray[i].id,
+              value: { success: true, caseId: caseId },
+            })
+          );
+        } else {
+          dispatch(
+            setIsCaseError({
+              id: statusArray[i].id,
+              value: { error: true, caseId: caseId },
+            })
+          );
+          dispatch(
+            setIsCaseSuccess({
+              id: statusArray[i].id,
+              value: { success: false, caseId: caseId },
+            })
+          );
         }
       } catch (error) {
         console.error(`Error processing status:`, error);
       }
     }
   };
-  // useEffect(() => {
-  //   const handleKeyDown = (event) => {
-  //     if (
-  //       (event.ctrlKey && event.shiftKey && event.key === "R") ||
-  //       (event.ctrlKey && event.key === "r") ||
-  //       (event.metaKey && event.shiftKey && event.key === "R") ||
-  //       (event.metaKey && event.key === "r")
-  //     ) {
-  //       event.preventDefault();
-  //       setWarning(true);
-  //       setWarningText(
-  //         "Your upload is not completed yet. Would you like to cancel the upload or stay on page and keep it continue?"
-  //       );
-  //       setIsUploadScreen(true);
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleKeyDown);
-
-  //   return () => {
-  //     window.removeEventListener("keydown", handleKeyDown);
-  //   };
-  // }, []);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -475,7 +382,9 @@ const Upload = () => {
 
   useEffect(() => {
     if (showTabe) {
-      dispatch(getAllProjects());
+      // Replace API call with mock function
+      console.log("Loading mock projects data");
+      dispatch(getAllProjects()); // Assume this action creator will be modified to return mock data
     }
   }, [showTabe, dispatch]);
 

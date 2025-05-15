@@ -26,21 +26,22 @@ export default function Index() {
     validationSchema: emailSchema,
     onSubmit: (values) => {
       dispatch(forgotPassword(values)).then((res) => {
-        if (res?.payload?.status == true) {
-          Toaster({customMessage: 'OTP sent on registered email'})
+        const payload = res.payload as { success: boolean }; // Explicitly cast the payload
+        if (payload.success === true) {
+          Toaster({ customMessage: 'OTP sent on registered email' });
           router.push({
             pathname: "/auth/enter-otp",
             query: { userName: values.email },
           });
         } else {
-          Toaster({ error: true, customMessage: `User ${values.email} does not exist` })
+          Toaster({ error: true, customMessage: `User ${values.email} does not exist` });
         }
       });
     },
   });
 
   return (
-    <div className="flex flex-col justify-center  gap-20">
+    <div className="flex flex-col justify-center gap-20">
       <div className="flex flex-col gap-y-3.5">
         <Typography variant="h1" color="text.secondary">
           Forgot Password
@@ -50,7 +51,7 @@ export default function Index() {
         </Typography>
       </div>
       <div className="flex flex-col gap-y-10">
-        <FormControl className="flex flex-col  gap-9 w-full">
+        <FormControl className="flex flex-col gap-9 w-full">
           <TextField
             id="outlined-required"
             label="User Name"
@@ -77,7 +78,6 @@ export default function Index() {
             onClick={() => {
               formik.handleSubmit();
             }}
-            // onClick={() => router.push("/auth/enter-otp")}
           >
             Verify User Name
           </Button>

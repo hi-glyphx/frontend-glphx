@@ -1,11 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import {
-  ForgotPasswordAPI,
-  LogInAPI,
-  LogOutAPI,
-  OTPVerifyAPI,
-  resetPasswordAPI,
-} from "../../Routes/Service";
+// Comment out or remove API imports
+// import {
+//   ForgotPasswordAPI,
+//   LogInAPI,
+//   LogOutAPI,
+//   OTPVerifyAPI,
+//   resetPasswordAPI,
+// } from "../../Routes/Service";
 import { AlertEnum, SESSION, TOKEN } from "../.././utils/Enums";
 import { setLoading, setMessage } from "./LayoutsSice";
 import { AuthType } from "@/utils/TYPES";
@@ -35,15 +36,42 @@ const initialState: AuthState = {
     return '';
   })(),
   
-  
-  // `${
-  //   (typeof window !== "undefined" && localStorage.getItem(TOKEN)) || ""
-  // }`,
   session: `${
     typeof window !== "undefined" &&
     JSON.parse(localStorage.getItem("SESSION") || "{}")
   }`,
   forgotPwd: "",
+};
+
+// Mock response data for demos
+const mockResponses = {
+  login: {
+    success: true,
+    session_key: "demo_session_token_12345",
+    user: {
+      id: 1,
+      username: "demouser",
+      email: "demo@example.com",
+      name: "Demo User"
+    }
+  },
+  logout: {
+    success: true,
+    message: "Successfully logged out"
+  },
+  forgotPassword: {
+    success: true,
+    data: "Password reset email sent",
+    message: "Check your email for reset instructions"
+  },
+  otpVerify: {
+    success: true,
+    message: "OTP verified successfully"
+  },
+  resetPassword: {
+    success: true,
+    message: "Password reset successfully"
+  }
 };
 
 export const LogIn = createAsyncThunk(
@@ -53,9 +81,17 @@ export const LogIn = createAsyncThunk(
       username: values?.username,
       password: values?.password,
     };
+    console.log("values", values);
     try {
       dispatch(setLoading(true));
-      const result = await LogInAPI(updatedValues);
+      
+      // Mock API response
+      // const result = await LogInAPI(updatedValues);
+      const result = mockResponses.login;
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       if (result) {
         dispatch(setLoading(false));
         dispatch(
@@ -67,7 +103,7 @@ export const LogIn = createAsyncThunk(
         );
         return result;
       } else {
-        throw result;
+        throw new Error("Login failed");
       }
     } catch (error: unknown) {
       dispatch(setLoading(false));
@@ -83,13 +119,18 @@ export const LogOut = createAsyncThunk(
   async (values, { dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const result = await LogOutAPI(values);
+      // const result = await LogOutAPI(values);
+      const result = mockResponses.logout;
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       if (result?.success) {
         dispatch(setLoading(false));
         dispatch(setSession(result));
         return result;
       } else {
-        throw result;
+        throw new Error("Logout failed");
       }
     } catch (error: unknown) {
       dispatch(setLoading(false));
@@ -100,29 +141,34 @@ export const LogOut = createAsyncThunk(
   }
 );
 
-export const forgotPassword = createAsyncThunk(
+export const forgotPassword = createAsyncThunk<
+  { data: string }, // Define the expected payload type
+  { email: string } // Define the input type
+>(
   "ForgotPassword",
   async (
-    values: {
-      email: string;
-    },
-    { dispatch }
-  ) => {
+    values: { email: string },
+    { dispatch, rejectWithValue }
+  ): Promise<{ data: string } | ReturnType<typeof rejectWithValue>> => {
     try {
       dispatch(setLoading(true));
-      const result = await ForgotPasswordAPI(values);
-      if (result) {
+      // const result = await ForgotPasswordAPI(values);
+      const result = mockResponses.forgotPassword;
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      if (result?.success) {
         dispatch(setLoading(false));
-        // dispatch(setSession(result));
-        return result;
+        return { data: result.data };
       } else {
-        throw result;
+        throw new Error("Password reset request failed");
       }
     } catch (error: unknown) {
       dispatch(setLoading(false));
       const errorMessage = (error as Error)?.message || "An error occurred.";
       dispatch(setMessage({ text: errorMessage, type: AlertEnum.Error }));
-      return error;
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -138,13 +184,17 @@ export const OTPVerify = createAsyncThunk(
   ) => {
     try {
       dispatch(setLoading(true));
-      const result = await OTPVerifyAPI(values);
+      // const result = await OTPVerifyAPI(values);
+      const result = mockResponses.otpVerify;
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       if (result) {
         dispatch(setLoading(false));
-        // dispatch(setSession(result));
         return result;
       } else {
-        throw result;
+        throw new Error("OTP verification failed");
       }
     } catch (error: unknown) {
       dispatch(setLoading(false));
@@ -160,13 +210,18 @@ export const ResetPassword = createAsyncThunk(
   async (values: any, { dispatch }) => {
     try {
       dispatch(setLoading(true));
-      const result = await resetPasswordAPI(values);
+      // const result = await resetPasswordAPI(values);
+      const result = mockResponses.resetPassword;
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       if (result) {
         dispatch(setLoading(false));
         dispatch(setSession(result));
         return result;
       } else {
-        throw result;
+        throw new Error("Password reset failed");
       }
     } catch (error: unknown) {
       dispatch(setLoading(false));
@@ -182,7 +237,6 @@ export const AuthSlice = createSlice({
   initialState,
   reducers: {
     removeToken: (state) => {
-      
       localStorage.removeItem(TOKEN);
       state.token = "";
       document.cookie = `sessionid=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
@@ -202,7 +256,7 @@ export const AuthSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(forgotPassword.fulfilled, (state, action) => {
-      state.forgotPwd = action.payload.data;
+      state.forgotPwd = (action.payload as { data: string }).data;
     });
   },
 });

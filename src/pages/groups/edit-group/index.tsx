@@ -12,11 +12,11 @@ export default function EditGroup() {
   const { id } = router.query;
   const dispatch = useDispatch<AppDispatch>();
 
-  useEffect(() => {
-    if (id) {
-      dispatch(EditList(id));
-    }
-  }, [dispatch, id]);
+  // useEffect(() => {
+  //   if (id) {
+  //     dispatch(EditList(id));
+  //   }
+  // }, [dispatch, id]);
   const { editList } = useSelector(({ GroupsSlice }) => GroupsSlice);
 
   const onSaveEditGroups = () => {

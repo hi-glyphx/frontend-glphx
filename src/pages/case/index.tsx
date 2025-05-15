@@ -222,34 +222,34 @@ const Case = () => {
     },
   ];
 
-  useEffect(() => {
-    const params: any = new URLSearchParams(searchParams);
-    let combinedParams = "";
-    for (const [key, value] of params) {
-      if (value != "") {
-        combinedParams += `&${value.slice(1)}`;
-      } else {
-        combinedParams += `${value.slice(1)}`;
-      }
-    }
-    combinedParams = combinedParams.slice(1);
-    if (combinedParams) {
-      dispatch(CaseList(`?${combinedParams}`));
-    }
+  // useEffect(() => {
+  //   const params: any = new URLSearchParams(searchParams);
+  //   let combinedParams = "";
+  //   for (const [key, value] of params) {
+  //     if (value != "") {
+  //       combinedParams += `&${value.slice(1)}`;
+  //     } else {
+  //       combinedParams += `${value.slice(1)}`;
+  //     }
+  //   }
+  //   combinedParams = combinedParams.slice(1);
+  //   if (combinedParams) {
+  //     dispatch(CaseList(`?${combinedParams}`));
+  //   }
 
-    // else {
-    //   dispatch(CaseList(`?page=1`));
-    // }
+  //   // else {
+  //   //   dispatch(CaseList(`?page=1`));
+  //   // }
 
-    console.log("caselist->",caseList)
-    console.log("search params->",searchParams)
+  //   console.log("caselist->",caseList)
+  //   console.log("search params->",searchParams)
 
 
-  }, [searchParams]);
+  // }, [searchParams]);
 
-  useEffect(() => {
-    dispatch(CaseList(`?page=1`));
-  }, []);
+  // useEffect(() => {
+  //   dispatch(CaseList(`?page=1`));
+  // }, []);
 
   return (
     <>

@@ -128,16 +128,37 @@ export const getAllProjects = createAsyncThunk(
   "getAllProjects",
   async (values, { dispatch }) => {
     try {
-      // dispatch(setLoading(true));
-      const result = await getAllProjectsApi(values);
-      // dispatch(setLoading(false));
-      if (result?.data) {
-        return result;
-      } else {
-        throw result;
-      }
+      // Mock data instead of API call
+      const mockProjects = {
+        data: [
+          { 
+            id: "proj-001", 
+            name: "Project Alpha", 
+            description: "Mock project for development testing",
+            created_at: new Date().toISOString()
+          },
+          { 
+            id: "proj-002", 
+            name: "Project Beta", 
+            description: "Secondary testing project",
+            created_at: new Date().toISOString()
+          },
+          { 
+            id: "proj-003", 
+            name: "Project Gamma", 
+            description: "Third project for UI validation",
+            created_at: new Date().toISOString()
+          }
+        ],
+        success: true
+      };
+      
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log("Returning mock projects data:", mockProjects);
+      return mockProjects;
     } catch (error: unknown) {
-      // dispatch(setLoading(false));
       const errorMessage = (error as Error)?.message || "An error occurred.";
       dispatch(setMessage({ text: errorMessage, type: AlertEnum.Error }));
       throw error;

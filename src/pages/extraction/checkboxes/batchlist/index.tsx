@@ -11,10 +11,10 @@ export default function Classification() {
   const dispatch = useDispatch<AppDispatch>();
   const[Trigger,setTrigger]=useState(0)
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    dispatch(GetClassificationBatches());
-  }, [dispatch,Trigger]);
+  //   dispatch(GetClassificationBatches());
+  // }, [dispatch,Trigger]);
 
   const onDeleteCases = () =>{
     setTrigger((prev)=> prev +1)

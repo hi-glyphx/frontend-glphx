@@ -24,6 +24,7 @@ import * as Yup from "yup";
 import Toaster from "@/components/Common/Toaster";
 import { useEffect } from "react";
 import { AppDispatch } from "@/Store/Store";
+import { PayloadAction } from "@reduxjs/toolkit";
 
 export default function Index() {
   const router = useRouter();
@@ -48,9 +49,10 @@ export default function Index() {
     onSubmit: (values) => {
       if (values) {
         dispatch(LogIn(values)).then((res) => {
-          if (res?.payload?.success == true) {
+          const payload = res.payload as { success: boolean; session_key: string };
+          if (payload?.success === true) {
             Toaster({ customMessage: "User logged in successful" });
-            document.cookie = `sessionid=${res.payload.session_key}; Max-Age=7200; Path=/;`;
+            document.cookie = `sessionid=${payload.session_key}; Max-Age=7200; Path=/;`;
             router.push("/upload");
           } else {
             Toaster({ error: true, customMessage: "An error occurred" });

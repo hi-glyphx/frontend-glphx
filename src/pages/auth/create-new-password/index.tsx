@@ -41,8 +41,9 @@ const {uid,token} = router.query
         values: values,
       };
       dispatch(ResetPassword(updatedData)).then((res) => {
-        if (res?.payload?.message) {
-          Toaster({ customMessage:res?.payload?.message})
+        const payload = res.payload as { message?: string };
+        if (payload?.message) {
+          Toaster({ customMessage: payload.message })
           dispatch(removeSession());
           router.push("/auth/signin");
         } else {

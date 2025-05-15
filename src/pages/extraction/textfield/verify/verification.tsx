@@ -994,62 +994,62 @@ const Verification = () => {
   const [seconds, setSeconds] = useState<any>();
 
   const [intigateApi, setintigateApi] = useState(false);
-  useEffect(() => {
-    if (intigateApi) {
-      const intervalId = setInterval(() => {
-        if (seconds > 0) {
-          setSeconds(seconds - 1);
-        } else {
-          dispatch(Verify(`?format=json`)).then((res) => {
-            if (!res?.payload?.meta?.batch_id) {
-              setSeconds(20);
-              setintigateApi(true);
-            } else {
-              setintigateApi(false);
-              document
-                .getElementById("auto-focus-extraction-section")
-                ?.scrollIntoView();
-              const verifyValue = findValueInObject(
-                res?.payload?.data,
-                "do_verification",
-                false
-              );
-              if (!verifyValue) {
-                setActiveTab("valid-fields");
-              }
-            }
-          });
-        }
-      }, 1000);
+  // useEffect(() => {
+  //   if (intigateApi) {
+  //     const intervalId = setInterval(() => {
+  //       if (seconds > 0) {
+  //         setSeconds(seconds - 1);
+  //       } else {
+  //         dispatch(Verify(`?format=json`)).then((res) => {
+  //           if (!res?.payload?.meta?.batch_id) {
+  //             setSeconds(20);
+  //             setintigateApi(true);
+  //           } else {
+  //             setintigateApi(false);
+  //             document
+  //               .getElementById("auto-focus-extraction-section")
+  //               ?.scrollIntoView();
+  //             const verifyValue = findValueInObject(
+  //               res?.payload?.data,
+  //               "do_verification",
+  //               false
+  //             );
+  //             if (!verifyValue) {
+  //               setActiveTab("valid-fields");
+  //             }
+  //           }
+  //         });
+  //       }
+  //     }, 1000);
 
-      return () => clearInterval(intervalId);
-    }
-    return () => dispatch(ClearVerifyData());
-  }, [dispatch, seconds, intigateApi]);
+  //     return () => clearInterval(intervalId);
+  //   }
+  //   return () => dispatch(ClearVerifyData());
+  // }, [dispatch, seconds, intigateApi]);
 
-  useEffect(() => {
-    if (!intigateApi) {
-      dispatch(Verify(`?format=json`)).then((res) => {
-        if (!res?.payload?.meta?.batch_id) {
-          setintigateApi(true);
-        } else {
-          setintigateApi(false);
-          document
-            .getElementById("auto-focus-extraction-section")
-            ?.scrollIntoView();
+  // useEffect(() => {
+  //   if (!intigateApi) {
+  //     dispatch(Verify(`?format=json`)).then((res) => {
+  //       if (!res?.payload?.meta?.batch_id) {
+  //         setintigateApi(true);
+  //       } else {
+  //         setintigateApi(false);
+  //         document
+  //           .getElementById("auto-focus-extraction-section")
+  //           ?.scrollIntoView();
 
-          const verifyValue = findValueInObject(
-            res?.payload?.data,
-            "do_verification",
-            false
-          );
-          if (!verifyValue) {
-            setActiveTab("valid-fields");
-          }
-        }
-      });
-    }
-  }, [dispatch, intigateApi]);
+  //         const verifyValue = findValueInObject(
+  //           res?.payload?.data,
+  //           "do_verification",
+  //           false
+  //         );
+  //         if (!verifyValue) {
+  //           setActiveTab("valid-fields");
+  //         }
+  //       }
+  //     });
+  //   }
+  // }, [dispatch, intigateApi]);
 
   // return () => {
   //   if (extractionVerifyList?.meta?.batch_id) {

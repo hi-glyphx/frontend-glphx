@@ -189,39 +189,39 @@ const Index = () => {
   const [seconds, setSeconds] = useState<any>();
 
   const [intigateApi, setintigateApi] = useState(false);
-  useEffect(() => {
-    if (intigateApi) {
-      const intervalId = setInterval(() => {
-        if (seconds > 0) {
-          setSeconds(seconds - 1);
-        } else {
-          dispatch(Classify()).then((res) => {
-            if (!res?.payload?.items?.length) {
-              setSeconds(20);
-              setintigateApi(true);
-            } else {
-              setintigateApi(false);
-            }
-          });
-        }
-      }, 1000);
+  // useEffect(() => {
+  //   if (intigateApi) {
+  //     const intervalId = setInterval(() => {
+  //       if (seconds > 0) {
+  //         setSeconds(seconds - 1);
+  //       } else {
+  //         dispatch(Classify()).then((res) => {
+  //           if (!res?.payload?.items?.length) {
+  //             setSeconds(20);
+  //             setintigateApi(true);
+  //           } else {
+  //             setintigateApi(false);
+  //           }
+  //         });
+  //       }
+  //     }, 1000);
 
-      return () => clearInterval(intervalId);
-    }
-    return () => dispatch(setClearClassify());
-  }, [dispatch, seconds, intigateApi]);
+  //     return () => clearInterval(intervalId);
+  //   }
+  //   return () => dispatch(setClearClassify());
+  // }, [dispatch, seconds, intigateApi]);
 
-  useEffect(() => {
-    if (!intigateApi) {
-      dispatch(Classify()).then((res) => {
-        if (!res?.payload?.items?.length) {
-          setintigateApi(true);
-        } else {
-          setintigateApi(false);
-        }
-      });
-    }
-  }, [dispatch]);
+  // useEffect(() => {
+  //   if (!intigateApi) {
+  //     dispatch(Classify()).then((res) => {
+  //       if (!res?.payload?.items?.length) {
+  //         setintigateApi(true);
+  //       } else {
+  //         setintigateApi(false);
+  //       }
+  //     });
+  //   }
+  // }, [dispatch]);
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -352,28 +352,7 @@ const Index = () => {
           </div>
         </div>
       )}
-      {!classify?.items[0]?.results?.length ? (
-        <div className="flex justify-center items-center h-[100vh]">
-          <div className="flex flex-col justify-center items-center h-screen">
-            <div className="flex flex-col gap-y-4">
-              <Typography
-                variant="h4"
-                color="text.secondary"
-                textAlign="center"
-              >
-                Reloading Page in {!seconds ? "20" : seconds} Seconds . . .
-              </Typography>
-              <Typography
-                variant="h1"
-                color="text.secondary"
-                textAlign="center"
-              >
-                No more batches to verify. Try after some time.
-              </Typography>
-            </div>
-          </div>
-        </div>
-      ) : (
+      
         <div className="classifincation-main-layout-section">
           <Card
             variant="outlined"
@@ -544,7 +523,7 @@ const Index = () => {
             </div>
           </Card>
         </div>
-      )}
+    
 
       <Raise_Ticket
         isExtraction={false}

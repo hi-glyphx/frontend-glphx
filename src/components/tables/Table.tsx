@@ -186,8 +186,12 @@ export default function Table(props: {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    props?.dispatchFunction && dispatch(props?.dispatchFunction(`?page=1`));
-  }, [dispatch]);
+    if (props?.dispatchFunction) {
+      // If dispatchFunction is a function, call it with the query parameter
+      const queryParam = `?page=1`;
+      props.dispatchFunction(queryParam);
+    }
+  }, [props.dispatchFunction]);
 
   const pageNumbers = Array.from(
     { length: props?.dataPage?.total_pages },

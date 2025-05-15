@@ -23,32 +23,33 @@ export default function Index() {
   const formik = useFormik({
     initialValues: initialValues,
     onSubmit: (values) => {
-      let data: any = {
-        email: userName,
+      let data = {
+        email: userName as string,
         token: values.otp,
       };
       dispatch(OTPVerify(data)).then((res) => {
-        if (res?.payload?.response?.status == 410) {
+        const payload = res.payload as { response?: { status: number; data: string }; uid?: string; token?: string };
+        if (payload?.response?.status === 410) {
           formik.setFieldValue("otp", "");
           Toaster({
             error: true,
-            customMessage: `${res?.payload?.response?.data}`,
+            customMessage: `${payload?.response?.data}`,
           });
-          if (res?.payload?.response?.data == "OTP Retry Exhausted") {
+          if (payload?.response?.data === "OTP Retry Exhausted") {
             router.push("/auth/forgot-password");
           }
         } else {
           Toaster({ customMessage: "OTP verification successful" });
           router.push({
             pathname: "/auth/create-new-password",
-            query: { uid: res?.payload?.uid, token: res?.payload?.token },
+            query: { uid: payload?.uid, token: payload?.token },
           });
         }
       });
     },
   });
 
-  const handleOtp = (otp) => {
+  const handleOtp = (otp: string) => {
     formik.setFieldValue("otp", otp);
   };
 
@@ -72,11 +73,11 @@ export default function Index() {
         </div>
       </div>
       <div className="flex flex-col gap-y-10">
-        <FormControl className="flex flex-col  gap-9 w-full">
+        <FormControl className="flex flex-col gap-9 w-full">
           <div className="otp-input-custom">
             <OtpInput
               value={formik.values.otp}
-              onChange={(otpValue) => {
+              onChange={(otpValue: string) => {
                 formik.setFieldValue("otp", otpValue);
               }}
               numInputs={6}
@@ -93,7 +94,6 @@ export default function Index() {
               }}
             />
           </div>
-          {/* <OTPInputComponent onOtpChange={handleOtp} /> */}
           {formik.errors?.otp && formik.touched.otp && formik.errors?.otp}
         </FormControl>
 
